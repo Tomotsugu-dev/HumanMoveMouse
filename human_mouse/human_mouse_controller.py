@@ -10,7 +10,7 @@ import random
 from typing import Tuple, Optional
 import numpy as np
 import pyautogui
-
+import importlib.resources
 # 导入轨迹生成函数 / Import the trajectory generation function
 from .human_mouse_stat_mj import generate_mouse_trajectory
 
@@ -28,7 +28,7 @@ class HumanMouseController:
     """
 
     def __init__(self,
-                 model_pkl: str,
+                 model_pkl: Optional[str] = None,
                  num_points: int = 100,
                  jitter_amplitude: float = 0.3,
                  speed_factor: float = 1.0):
@@ -42,7 +42,18 @@ class HumanMouseController:
             jitter_amplitude: 抖动幅度，默认0.3 / Amplitude of the jitter, default is 0.3.
             speed_factor: 速度因子，默认1.0，值越大移动越快 / Speed factor, default is 1.0, higher values mean faster movement.
         """
-        self.model_pkl = model_pkl
+        if model_pkl is None:
+            # If no path is given, find the default model inside the package.
+            # 'human_mouse' is the name of your package.
+            try:
+                self.model_pkl = importlib.resources.files('human_mouse').joinpath('mouse_model.pkl')
+            except ModuleNotFoundError:
+                # Fallback for cases where the package isn't installed, e.g., local testing
+                self.model_pkl = "mouse_model.pkl"
+        else:
+            # If the user provides a path, use it.
+            self.model_pkl = model_pkl
+
         self.num_points = num_points
         self.jitter_amplitude = jitter_amplitude
         self.speed_factor = speed_factor
