@@ -41,25 +41,19 @@ These paths closely mimic real human behavior and are ideal for automation tasks
 
 You can install the package directly from PyPI:
 
-Bash
-
-```
+```bash
 pip install HumanMoveMouse
 ```
 
 Alternatively, you can install the required dependencies manually:
 
-Bash
-
-```
+```bash
 pip install numpy pandas scipy scikit-learn pyautogui
 ```
 
 If you need to use the data collection feature to train your own model, please install `pygame` as well:
 
-Bash
-
-```
+```bash
 pip install pygame
 ```
 
@@ -71,11 +65,8 @@ pip install pygame
 
 Before using any functions, you first need to create an instance of `HumanMouseController`. The library includes a default pre-trained model (`mouse_model.pkl`) that is loaded automatically upon initialization.
 
-Python
-
-```
-from human_mouse import HumanMouseController
-
+```python
+from humanmouse import HumanMouseController
 # Create a controller instance
 # This will use the library's built-in default model
 controller = HumanMouseController()
@@ -97,9 +88,7 @@ controller = HumanMouseController()
 
 Move the cursor smoothly from one point to another.
 
-Python
-
-```
+```python
 # Define start and end points
 start_point = (100, 100)
 end_point = (800, 600)
@@ -122,9 +111,7 @@ controller.move(start_point, end_point)
 
 Move to a specified location and then perform a single click.
 
-Python
-
-```
+```python
 start_point = (800, 600)
 end_point = (400, 400)
 
@@ -140,9 +127,7 @@ controller.move_and_click(start_point, end_point)
 
 Double-clicking, right-clicking, and dragging are also supported.
 
-Python
-
-```
+```python
 # Move and double-click
 controller.move_and_double_click((400, 400), (300, 300))
 
@@ -157,9 +142,7 @@ controller.drag((600, 500), (100, 100))
 
 You can dynamically adjust the mouse movement speed at any time.
 
-Python
-
-```
+```python
 # Set the speed to double the original
 controller.set_speed(2.0)
 controller.move((100, 100), (800, 600))
@@ -188,25 +171,27 @@ If you want the generated trajectories to better match your personal mouse usage
 
 Run the `Mouse Trajectory Collecter.py` script located in the `csv_data_collecter` directory. It will open a Pygame window. Simply move your mouse from the top-left corner to the bottom-right corner multiple times. Each movement will be saved as a CSV file in the `csv_data` directory.
 
-Bash
+```bash
 
-```
 python csv_data_collecter/"Mouse Trajectory Collecter.py"
+
 ```
 
 #### 2. Train the Model
 
 After collecting enough data (at least 100 samples are recommended), use the `train_mouse_model` function from `human_mouse_stat_mj.py` to train the model.
 
-Python
-
-```
+```python
 from human_mouse import train_mouse_model 
 
 # Specify the directory containing the CSV files and the path to save the new model
 train_mouse_model("./csv_data", "my_mouse_model.pkl")
 
 print("Model training complete!")
+```
+
+```
+
 ```
 
 Now you can load your custom model in the controller:
