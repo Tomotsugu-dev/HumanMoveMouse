@@ -274,6 +274,4 @@ train_mouse_model("./csv_data", "mouse_model.pkl")`
 
 ## Demonstration
 
-<video src="https://raw.githubusercontent.com/HumanMoveMouse contributors/HumanMoveMouse/main/docs/Demo_SliderCaptcha.mp4" controls muted loop style="max-width:100%; height:auto;">
-  Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/3aff8057-9f25-4e83-94de-063e0c1714fd
