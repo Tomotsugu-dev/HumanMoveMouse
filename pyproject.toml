@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "HumanMoveMouse"
+version = "0.1.0"
+description = "Human-like mouse automation using statistical models and minimum-jerk interpolation"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name="Tmokotokyoshi", email="anonymous@example.invalid" }]
