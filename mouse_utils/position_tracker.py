@@ -47,4 +47,4 @@ def track_mouse_position(duration: int = 10):
 if __name__ == '__main__':
     # 独立运行时，追踪15秒
     # When run independently, track for 15 seconds
-    track_mouse_position(15)
+    track_mouse_position(120)
