@@ -172,9 +172,7 @@ If you want the generated trajectories to better match your personal mouse usage
 Run the `Mouse Trajectory Collecter.py` script located in the `csv_data_collecter` directory. It will open a Pygame window. Simply move your mouse from the top-left corner to the bottom-right corner multiple times. Each movement will be saved as a CSV file in the `csv_data` directory.
 
 ```bash
-
 python csv_data_collecter/"Mouse Trajectory Collecter.py"
-
 ```
 
 #### 2. Train the Model
@@ -273,3 +271,9 @@ train_mouse_model("./csv_data", "mouse_model.pkl")`
 ```
 
 ---
+
+## Demonstration
+
+<video src="https://raw.githubusercontent.com/HumanMoveMouse contributors/HumanMoveMouse/main/docs/Demo_SliderCaptcha.mp4" controls muted loop style="max-width:100%; height:auto;">
+  Your browser does not support the video tag.
+</video>
