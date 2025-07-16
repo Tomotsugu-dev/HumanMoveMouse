@@ -1,8 +1,6 @@
 # HumanMoveMouse 🖱️
 
-[![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
-
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
+![PyPI](https://img.shields.io/pypi/v/HumanMoveMouse)[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
 🎯 **Human-like mouse automation using statistical models and minimum-jerk interpolation.**
