@@ -56,6 +56,18 @@ These paths closely mimic real human behavior and are ideal for automation tasks
 
 - **Pre-trained Model**: Includes a model trained on real human mouse movements for immediate use.
 
+### 🎬 Demo
+
+Watch HumanMoveMouse in action:
+
+<!-- Insert your video here -->
+<!-- For GitHub video upload: drag and drop your .mp4/.mov file directly into this comment -->
+<!-- For YouTube/other platforms: [![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID) -->
+<!-- For local video file: <video src="demo.mp4" width="100%" controls></video> -->
+<!-- For GIF: ![Demo](demo.gif) -->
+
+The demo shows natural, human-like mouse movements with smooth trajectories and realistic speed variations.
+
 ---
 
 ## 📦 Installation
