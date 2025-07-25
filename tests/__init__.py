@@ -1,0 +1,3 @@
+"""
+HumanMouse test suite
+"""

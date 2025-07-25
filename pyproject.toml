@@ -1,0 +1,130 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "HumanMoveMouse"
+version = "1.0.0"
+description = "A human-like mouse movement automation tool based on real trajectory data"
+readme = "README.md"
+authors = [
+    {name = "HumanMoveMouse contributors"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Topic :: System :: Monitoring",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.20.0",
+    "pandas>=1.3.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=0.24.0",
+    "pyautogui>=0.9.50",
+]
+keywords = ["mouse", "automation", "human-like", "trajectory", "movement", "testing", "ui-automation"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.950",
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+]
+collector = [
+    "pygame>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Tomotsugu-dev/HumanMoveMouse"
+Documentation = "https://humanmovemouse.readthedocs.io"
+Repository = "https://github.com/Tomotsugu-dev/HumanMoveMouse.git"
+"Bug Tracker" = "https://github.com/Tomotsugu-dev/HumanMoveMouse/issues"
+Changelog = "https://github.com/Tomotsugu-dev/HumanMoveMouse/blob/main/CHANGELOG.md"
+
+[project.scripts]
+humanmouse = "humanmouse.cli:main"
+humanmouse-collector = "humanmouse.tools.collector:main"
+humanmouse-player = "humanmouse.tools.player:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["humanmouse*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+humanmouse = ["models/data/*.pkl", "py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov=humanmouse --cov-report=html --cov-report=term"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+source = ["src/humanmouse"]
+omit = [
+    "*/tests/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]

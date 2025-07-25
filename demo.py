@@ -1,5 +1,5 @@
 """
-run_main.py - Main Control Panel for Human Mouse Simulation
+demo.py - Main Control Panel for Human Mouse Simulation
 
 This script serves as the central, interactive entry point for the entire
 human mouse simulation project. It provides a text-based menu to access
@@ -11,13 +11,20 @@ various functionalities from different modules, including:
 
 Usage:
     Run this script from the project's root directory:
-    python run_main.py
+    python demo.py
 """
+import sys
+import os
+
+# Add current directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
+
 from mouse_utils.position_tracker import track_mouse_position
-from demos.basic_actions_demo import run_basic_actions_demo
+from demos.basic_demo_simple import run_basic_actions_demo
 from demos.parameter_tuning_demo import run_parameter_demo
 from demos.drag_demo import run_drag_demo
-from train_model import train_and_save_model
+from scripts.train_model import train_and_save_model
 
 def main_menu():
     """Displays the main menu and handles user input."""
@@ -65,5 +72,9 @@ def main_menu():
         if choice in ('1', '2', '3', '4', '5'):
              input("\nPress Enter to return to the menu...")
 
-if __name__ == "__main__":
+def main():
+    """Main entry point"""
     main_menu()
+
+if __name__ == "__main__":
+    main()

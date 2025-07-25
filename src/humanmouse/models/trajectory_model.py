@@ -15,13 +15,6 @@ import inspect
 import numpy as np
 import pandas as pd
 from scipy import interpolate
-
-# Suppress sklearn warnings
-try:
-    from . import suppress_warnings
-except ImportError:
-    pass
-
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 

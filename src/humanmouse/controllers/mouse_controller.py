@@ -11,10 +11,8 @@ from typing import Tuple, Optional
 import numpy as np
 import pyautogui
 import importlib.resources
-import os
 # 导入轨迹生成函数 / Import the trajectory generation function
-from .human_mouse_stat_mj import generate_mouse_trajectory
-from . import get_default_model_path
+from ..models.trajectory_model import generate_mouse_trajectory
 
 class HumanMouseController:
     """
@@ -45,8 +43,14 @@ class HumanMouseController:
             speed_factor: 速度因子，默认1.0，值越大移动越快 / Speed factor, default is 1.0, higher values mean faster movement.
         """
         if model_pkl is None:
-            # If no path is given, find the default model
-            self.model_pkl = get_default_model_path()
+            # If no path is given, find the default model inside the package.
+            # 'human_mouse' is the name of your package.
+            try:
+                self.model_pkl = importlib.resources.files('humanmouse').joinpath('models/data/mouse_model.pkl')
+            except ModuleNotFoundError:
+                # Fallback for cases where the package isn't installed, e.g., local testing
+                from ..models import get_default_model_path
+                self.model_pkl = get_default_model_path()
         else:
             # If the user provides a path, use it.
             self.model_pkl = model_pkl
@@ -230,6 +234,68 @@ class HumanMouseController:
         if speed_factor <= 0:
             raise ValueError("Speed factor must be greater than 0")
         self.speed_factor = speed_factor
+
+    # ===== 新增方法：从当前位置开始移动 / New methods: move from current position =====
+    
+    def move_to(self, end_point: Tuple[float, float], seed: Optional[int] = None):
+        """
+        从当前鼠标位置移动到目标位置
+        Moves from current mouse position to target position.
+        
+        Args:
+            end_point: 目标坐标 (x, y) / Target coordinates (x, y).
+            seed: 随机种子，默认None表示随机 / Random seed, None means random.
+        """
+        current_pos = pyautogui.position()
+        self.move((current_pos.x, current_pos.y), end_point, seed)
+    
+    def click_at(self, end_point: Tuple[float, float], seed: Optional[int] = None):
+        """
+        从当前鼠标位置移动到目标位置并单击
+        Moves from current mouse position to target and clicks.
+        
+        Args:
+            end_point: 目标坐标 (x, y) / Target coordinates (x, y).
+            seed: 随机种子，默认None表示随机 / Random seed, None means random.
+        """
+        current_pos = pyautogui.position()
+        self.move_and_click((current_pos.x, current_pos.y), end_point, seed)
+    
+    def double_click_at(self, end_point: Tuple[float, float], seed: Optional[int] = None):
+        """
+        从当前鼠标位置移动到目标位置并双击
+        Moves from current mouse position to target and double-clicks.
+        
+        Args:
+            end_point: 目标坐标 (x, y) / Target coordinates (x, y).
+            seed: 随机种子，默认None表示随机 / Random seed, None means random.
+        """
+        current_pos = pyautogui.position()
+        self.move_and_double_click((current_pos.x, current_pos.y), end_point, seed)
+    
+    def right_click_at(self, end_point: Tuple[float, float], seed: Optional[int] = None):
+        """
+        从当前鼠标位置移动到目标位置并右击
+        Moves from current mouse position to target and right-clicks.
+        
+        Args:
+            end_point: 目标坐标 (x, y) / Target coordinates (x, y).
+            seed: 随机种子，默认None表示随机 / Random seed, None means random.
+        """
+        current_pos = pyautogui.position()
+        self.move_and_right_click((current_pos.x, current_pos.y), end_point, seed)
+    
+    def drag_to(self, end_point: Tuple[float, float], seed: Optional[int] = None):
+        """
+        从当前鼠标位置拖拽到目标位置
+        Drags from current mouse position to target position.
+        
+        Args:
+            end_point: 目标坐标 (x, y) / Target coordinates (x, y).
+            seed: 随机种子，默认None表示随机 / Random seed, None means random.
+        """
+        current_pos = pyautogui.position()
+        self.drag((current_pos.x, current_pos.y), end_point, seed)
 
 
 # 使用示例 / Example Usage

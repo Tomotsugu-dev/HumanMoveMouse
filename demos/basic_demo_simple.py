@@ -1,17 +1,45 @@
-# demos/basic_actions_demo.py
+"""
+简化版基础动作演示
+Simplified basic actions demo
+"""
 import time
-from . import get_controller
+import sys
+import os
+
+# Add paths for imports
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+
+# Use original imports
+from human_mouse.human_mouse_controller import HumanMouseController
 
 def run_basic_actions_demo(        
         point_A = (200, 200),
         point_B = (800, 200),
         point_C = (800, 600),
         point_D = (200, 600)):
-    """Demonstrates all basic mouse actions in a sequence with visual indicators."""
+    """Demonstrates all basic mouse actions in a sequence."""
     print("--- Starting Basic Actions Demo ---")
     
     try:
-        controller = get_controller()
+        # Try to find model in multiple locations
+        model_paths = [
+            os.path.join(parent_dir, "mouse_model.pkl"),
+            os.path.join(parent_dir, "src", "humanmouse", "models", "data", "mouse_model.pkl"),
+            "mouse_model.pkl"
+        ]
+        
+        model_path = None
+        for path in model_paths:
+            if os.path.exists(path):
+                model_path = path
+                break
+        
+        if not model_path:
+            print("Error: Cannot find mouse_model.pkl")
+            return
+            
+        controller = HumanMouseController(model_pkl=model_path)
         
         print("Demonstration will start in 3 seconds... Please do not move the mouse.")
         time.sleep(3)
@@ -44,6 +72,8 @@ def run_basic_actions_demo(
 
     except Exception as e:
         print(f"[Error] in basic_actions_demo: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == '__main__':
     run_basic_actions_demo()
