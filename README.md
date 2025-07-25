@@ -58,15 +58,7 @@ These paths closely mimic real human behavior and are ideal for automation tasks
 
 ### 🎬 Demo
 
-Watch HumanMoveMouse in action:
-
-<!-- Insert your video here -->
-<!-- For GitHub video upload: drag and drop your .mp4/.mov file directly into this comment -->
-<!-- For YouTube/other platforms: [![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID) -->
-<!-- For local video file: <video src="demo.mp4" width="100%" controls></video> -->
-<!-- For GIF: ![Demo](demo.gif) -->
-
-The demo shows natural, human-like mouse movements with smooth trajectories and realistic speed variations.
+https://github.com/user-attachments/assets/55e5e295-bb93-4122-b4de-63380c4d1b13
 
 ---
 
@@ -140,6 +132,7 @@ controller.move((100, 100), (800, 600))
 Initialize the controller.
 
 **Parameters:**
+
 - `model_pkl` (str, optional): Path to a custom model file. If None, uses the built-in model.
 - `num_points` (int): Number of trajectory points. Higher = smoother. Default: 100.
 - `jitter_amplitude` (float): Random jitter magnitude. 0 = no jitter. Default: 0.3.
@@ -155,6 +148,7 @@ controller.move((100, 100), (800, 600), seed=42)  # Reproducible trajectory
 ```
 
 **Parameters:**
+
 - `start_point` (tuple): Starting coordinates (x, y).
 - `end_point` (tuple): Target coordinates (x, y).
 - `seed` (int, optional): Random seed for reproducible trajectories.
@@ -201,6 +195,7 @@ controller.set_speed(0.5)  # Half speed
 ```
 
 **Parameters:**
+
 - `speed_factor` (float): New speed multiplier (must be > 0).
 
 ### Methods Starting from Current Position
@@ -215,6 +210,7 @@ controller.move_to((800, 600), seed=42)  # Reproducible trajectory
 ```
 
 **Parameters:**
+
 - `end_point` (tuple): Target coordinates (x, y).
 - `seed` (int, optional): Random seed for reproducible trajectories.
 
@@ -265,6 +261,7 @@ controller = HumanMouseController(model_pkl="path/to/your/model.pkl")
 ### Training Your Own Model
 
 For training custom models with your own mouse movement data, please refer to the [GitHub repository](https://github.com/Tomotsugu-dev/HumanMoveMouse) which includes:
+
 - Data collection tools
 - Model training scripts
 - Complete development environment
@@ -286,6 +283,7 @@ This project is provided for **educational and research purposes only**. By usin
 1. **Legal Use Only**: This tool must only be used in compliance with all applicable laws and regulations. Users are solely responsible for ensuring their use complies with local, state, federal, and international laws.
 
 2. **No Malicious Use**: This software must NOT be used for any malicious, harmful, or illegal activities, including but not limited to:
+   
    - Unauthorized access to computer systems
    - Circumventing security measures or access controls
    - Creating or distributing malware
@@ -294,11 +292,13 @@ This project is provided for **educational and research purposes only**. By usin
    - Any form of fraud, deception, or harassment
 
 3. **User Responsibility**: Users assume full responsibility and liability for their use of this software. The developers and contributors:
+   
    - Are NOT responsible for any misuse or damage caused by this tool
    - Do NOT endorse or encourage any illegal or unethical use
    - Cannot be held liable for any consequences resulting from the use of this software
 
 4. **No Warranty**: This software is provided "AS IS" without warranty of any kind, express or implied. The developers make no guarantees about its:
+   
    - Suitability for any particular purpose
    - Reliability, accuracy, or performance
    - Compatibility with any specific system or application
