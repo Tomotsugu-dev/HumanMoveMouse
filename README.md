@@ -133,63 +133,110 @@ Initialize the controller.
 - `jitter_amplitude` (float): Random jitter magnitude. 0 = no jitter. Default: 0.3.
 - `speed_factor` (float): Movement speed multiplier. >1 = faster, <1 = slower. Default: 1.0.
 
-#### `move(self, start_point, end_point, seed=None)`
+#### `controller.move(start_point, end_point, seed=None)`
 
 Move the mouse from start to end point.
+
+```python
+controller.move((100, 100), (800, 600))
+controller.move((100, 100), (800, 600), seed=42)  # Reproducible trajectory
+```
 
 **Parameters:**
 - `start_point` (tuple): Starting coordinates (x, y).
 - `end_point` (tuple): Target coordinates (x, y).
 - `seed` (int, optional): Random seed for reproducible trajectories.
 
-#### `move_and_click(self, start_point, end_point, seed=None)`
+#### `controller.move_and_click(start_point, end_point, seed=None)`
 
 Move to a location and perform a single click.
 
-#### `move_and_double_click(self, start_point, end_point, seed=None)`
+```python
+controller.move_and_click((100, 100), (400, 400))
+```
+
+#### `controller.move_and_double_click(start_point, end_point, seed=None)`
 
 Move to a location and perform a double click.
 
-#### `move_and_right_click(self, start_point, end_point, seed=None)`
+```python
+controller.move_and_double_click((400, 400), (600, 300))
+```
+
+#### `controller.move_and_right_click(start_point, end_point, seed=None)`
 
 Move to a location and perform a right click.
 
-#### `drag(self, start_point, end_point, seed=None)`
+```python
+controller.move_and_right_click((600, 300), (800, 500))
+```
+
+#### `controller.drag(start_point, end_point, seed=None)`
 
 Drag from start to end point (press and hold left button).
 
-#### `set_speed(self, speed_factor)`
+```python
+controller.drag((300, 300), (500, 500))
+```
+
+#### `controller.set_speed(speed_factor)`
 
 Dynamically adjust movement speed.
+
+```python
+controller.set_speed(2.0)  # Double speed
+controller.set_speed(0.5)  # Half speed
+```
 
 **Parameters:**
 - `speed_factor` (float): New speed multiplier (must be > 0).
 
 ### Methods Starting from Current Position
 
-#### `move_to(self, end_point, seed=None)`
+#### `controller.move_to(end_point, seed=None)`
 
 Move from current mouse position to target position.
+
+```python
+controller.move_to((800, 600))
+controller.move_to((800, 600), seed=42)  # Reproducible trajectory
+```
 
 **Parameters:**
 - `end_point` (tuple): Target coordinates (x, y).
 - `seed` (int, optional): Random seed for reproducible trajectories.
 
-#### `click_at(self, end_point, seed=None)`
+#### `controller.click_at(end_point, seed=None)`
 
 Move from current position to target and perform a single click.
 
-#### `double_click_at(self, end_point, seed=None)`
+```python
+controller.click_at((400, 400))
+```
+
+#### `controller.double_click_at(end_point, seed=None)`
 
 Move from current position to target and perform a double click.
 
-#### `right_click_at(self, end_point, seed=None)`
+```python
+controller.double_click_at((600, 300))
+```
+
+#### `controller.right_click_at(end_point, seed=None)`
 
 Move from current position to target and perform a right click.
 
-#### `drag_to(self, end_point, seed=None)`
+```python
+controller.right_click_at((500, 500))
+```
+
+#### `controller.drag_to(end_point, seed=None)`
 
 Drag from current position to target (press and hold left button).
+
+```python
+controller.drag_to((300, 300))
+```
 
 ---
 
