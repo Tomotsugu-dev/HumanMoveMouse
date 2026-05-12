@@ -1,49 +1,46 @@
-# demos/basic_actions_demo.py
+"""
+基础动作演示
+Basic actions demo - move / click / double-click / right-click / drag.
+"""
 import time
-from . import get_controller
 
-def run_basic_actions_demo(        
-        point_A = (200, 200),
-        point_B = (800, 200),
-        point_C = (800, 600),
-        point_D = (200, 600)):
-    """Demonstrates all basic mouse actions in a sequence with visual indicators."""
+from humanmouse import HumanMouseController
+
+
+def run_basic_actions_demo(
+    point_a: tuple[int, int] = (200, 200),
+    point_b: tuple[int, int] = (800, 200),
+    point_c: tuple[int, int] = (800, 600),
+    point_d: tuple[int, int] = (200, 600),
+) -> None:
+    """Demonstrates all basic mouse actions in a sequence."""
     print("--- Starting Basic Actions Demo ---")
-    
-    try:
-        controller = get_controller()
-        
-        print("Demonstration will start in 3 seconds... Please do not move the mouse.")
-        time.sleep(3)
+    controller = HumanMouseController()
 
-        # 1. Move Only
-        print("1. Demonstrating: Move Only (from A to B)")
-        controller.move(point_A, point_B)
-        time.sleep(1)
+    print("Demonstration will start in 3 seconds... Please do not move the mouse.")
+    time.sleep(3)
 
-        # 2. Move and Click
-        print("2. Demonstrating: Move and Click (from B to C)")
-        controller.move_and_click(point_B, point_C)
-        time.sleep(1)
+    print("1. Move Only (A -> B)")
+    controller.move(point_a, point_b)
+    time.sleep(1)
 
-        # 3. Move and Double-Click
-        print("3. Demonstrating: Move and Double-Click (from C to D)")
-        controller.move_and_double_click(point_C, point_D)
-        time.sleep(1)
+    print("2. Move and Click (B -> C)")
+    controller.move_and_click(point_b, point_c)
+    time.sleep(1)
 
-        # 4. Move and Right-Click
-        print("4. Demonstrating: Move and Right-Click (at current location D)")
-        controller.move_and_right_click(point_D, point_D)
-        time.sleep(1)
+    print("3. Move and Double-Click (C -> D)")
+    controller.move_and_double_click(point_c, point_d)
+    time.sleep(1)
 
-        # 5. Drag and Drop
-        print("5. Demonstrating: Drag and Drop (from D back to A)")
-        controller.drag(point_D, point_A)
+    print("4. Move and Right-Click (at D)")
+    controller.move_and_right_click(point_d, point_d)
+    time.sleep(1)
 
-        print("\n--- Basic Actions Demo Finished ---")
+    print("5. Drag and Drop (D -> A)")
+    controller.drag(point_d, point_a)
 
-    except Exception as e:
-        print(f"[Error] in basic_actions_demo: {e}")
+    print("--- Basic Actions Demo Finished ---")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run_basic_actions_demo()

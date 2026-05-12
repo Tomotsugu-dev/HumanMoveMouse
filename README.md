@@ -64,11 +64,31 @@ https://github.com/user-attachments/assets/55e5e295-bb93-4122-b4de-63380c4d1b13
 
 ## 📦 Installation
 
-You can install the package directly from PyPI:
+Install from PyPI:
 
 ```bash
 pip install HumanMoveMouse
 ```
+
+Or with [uv](https://github.com/astral-sh/uv):
+
+```bash
+uv add HumanMoveMouse
+```
+
+### From source (development)
+
+```bash
+# clone the repo, then:
+uv sync                         # creates .venv and installs deps + the package in editable mode
+# or with plain pip:
+pip install -e ".[dev]"
+```
+
+Optional extras:
+
+- `humanmouse[collector]` — adds `pygame`, required only for running the trajectory collector under [csv_data_collector/](csv_data_collector/).
+- `humanmouse[dev]` — adds `pytest` and `pygame` for tests + dev workflows.
 
 ---
 
@@ -260,11 +280,39 @@ controller = HumanMouseController(model_pkl="path/to/your/model.pkl")
 
 ### Training Your Own Model
 
-For training custom models with your own mouse movement data, please refer to the [GitHub repository](https://github.com/Tomotsugu-dev/HumanMoveMouse) which includes:
+Collect raw trajectories with the Pygame collector, then re-train the bundled model:
 
-- Data collection tools
-- Model training scripts
-- Complete development environment
+```bash
+# 1. Collect samples (saves CSVs into csv_data/)
+uv run python csv_data_collector/mouse_trajectory_collector.py
+
+# 2. Re-train the bundled model from csv_data/
+uv run python scripts/train_model.py
+```
+
+### Project Layout
+
+```text
+src/humanmouse/          # Library code (PEP 420 src layout)
+  __init__.py            # Public API: HumanMouseController, create_controller
+  __version__.py
+  cli.py                 # `humanmouse` console script
+  controllers/           # HumanMouseController
+  models/                # PCA + GMM + Minimum-Jerk trajectory model
+    data/mouse_model.pkl # Bundled, pre-trained model
+  utils/                 # track_mouse_position helper
+csv_data/                # 330+ recorded human trajectories (training corpus)
+csv_data_collector/      # Pygame app to record more trajectories
+demos/                   # Runnable demo scripts
+scripts/train_model.py   # Re-train the bundled model from csv_data/
+tests/                   # pytest smoke tests
+```
+
+### Running tests
+
+```bash
+uv run pytest
+```
 
 ---
 

@@ -1,5 +1,5 @@
 """
-Mouse Trajectory Collecter.py
+mouse_trajectory_collector.py
 
 Description:
     A Pygame-based application that presents the user with a green “START” circle
@@ -61,7 +61,7 @@ Notes:
     • On failure (wrong release), the game resets without saving data.
     
 -------------------------------------------------------------------------------
-Mouse Trajectory Collecter.py
+mouse_trajectory_collector.py
 
 描述：
     这是一个基于 Pygame 的应用程序，屏幕上随机放置一个绿色的“开始”圆圈和一个红色的“结束”圆圈。

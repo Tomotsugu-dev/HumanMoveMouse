@@ -1,81 +1,73 @@
 """
-测试轨迹数据结构
-Test trajectory data structures
+轨迹生成的 smoke 测试 - 不真实驱动鼠标,只校验几何属性
+Smoke tests for trajectory generation - geometry only, no real mouse driving.
 """
+import numpy as np
 import pytest
-from datetime import datetime
-from humanmouse.core.trajectory import Trajectory, TrajectoryPoint
+
+from humanmouse.models import generate_mouse_trajectory, get_default_model_path
 
 
-class TestTrajectoryPoint:
-    """测试TrajectoryPoint类"""
-    
-    def test_creation(self):
-        """测试创建轨迹点"""
-        point = TrajectoryPoint(x=100.0, y=200.0, timestamp=1.0)
-        assert point.x == 100.0
-        assert point.y == 200.0
-        assert point.timestamp == 1.0
-        assert point.velocity is None
-        assert point.acceleration is None
-    
-    def test_distance_to(self):
-        """测试计算距离"""
-        point1 = TrajectoryPoint(x=0.0, y=0.0, timestamp=0.0)
-        point2 = TrajectoryPoint(x=3.0, y=4.0, timestamp=1.0)
-        assert point1.distance_to(point2) == 5.0
-    
-    def test_as_tuple(self):
-        """测试转换为元组"""
-        point = TrajectoryPoint(x=100.0, y=200.0, timestamp=1.0)
-        assert point.as_tuple() == (100.0, 200.0)
+@pytest.fixture(scope="module")
+def model_path() -> str:
+    return get_default_model_path()
 
 
-class TestTrajectory:
-    """测试Trajectory类"""
-    
-    def test_creation(self):
-        """测试创建轨迹"""
-        trajectory = Trajectory()
-        assert len(trajectory.points) == 0
-        assert trajectory.metadata == {}
-    
-    def test_add_point(self):
-        """测试添加轨迹点"""
-        trajectory = Trajectory()
-        point = TrajectoryPoint(x=100.0, y=200.0, timestamp=1.0)
-        trajectory.add_point(point)
-        assert len(trajectory.points) == 1
-        assert trajectory.points[0] == point
-    
-    def test_properties(self):
-        """测试轨迹属性"""
-        trajectory = Trajectory()
-        
-        # 添加几个点
-        trajectory.add_point(TrajectoryPoint(x=0.0, y=0.0, timestamp=0.0))
-        trajectory.add_point(TrajectoryPoint(x=3.0, y=4.0, timestamp=1.0))
-        trajectory.add_point(TrajectoryPoint(x=6.0, y=8.0, timestamp=2.0))
-        
-        # 测试起始点和结束点
-        assert trajectory.start_point.x == 0.0
-        assert trajectory.end_point.x == 6.0
-        
-        # 测试总距离
-        assert trajectory.total_distance == 10.0  # 5 + 5
-    
-    def test_resample(self):
-        """测试重采样"""
-        trajectory = Trajectory()
-        
-        # 添加点
-        for i in range(10):
-            trajectory.add_point(TrajectoryPoint(x=float(i), y=float(i), timestamp=float(i)))
-        
-        # 重采样到5个点
-        resampled = trajectory.resample(5)
-        assert len(resampled.points) == 5
-        
-        # 检查起始和结束点保持不变
-        assert resampled.points[0].x == 0.0
-        assert resampled.points[-1].x == 9.0
+def test_trajectory_shape(model_path: str) -> None:
+    """生成轨迹的形状应与 num_points 一致 / Output shape must match num_points."""
+    xy, dt = generate_mouse_trajectory(
+        model_path=model_path,
+        start_point=(100, 100),
+        end_point=(800, 600),
+        num_points=50,
+        jitter_amplitude=0.3,
+        seed=42,
+    )
+    assert xy.shape == (50, 2)
+    assert dt.shape == (50,)
+
+
+def test_trajectory_dt_first_is_zero(model_path: str) -> None:
+    """dt[0] 必须为 0,且其余为正 / dt[0] must be 0 and the rest positive."""
+    _, dt = generate_mouse_trajectory(
+        model_path=model_path,
+        start_point=(100, 100),
+        end_point=(800, 600),
+        num_points=50,
+        jitter_amplitude=0.3,
+        seed=42,
+    )
+    assert dt[0] == 0.0
+    assert np.all(dt[1:] >= 0.0)
+
+
+def test_trajectory_endpoints_close(model_path: str) -> None:
+    """起点和终点应贴近输入(jitter 会有偏移) / Endpoints should be close to inputs."""
+    start = (100.0, 100.0)
+    end = (800.0, 600.0)
+    xy, _ = generate_mouse_trajectory(
+        model_path=model_path,
+        start_point=start,
+        end_point=end,
+        num_points=120,
+        jitter_amplitude=0.0,  # 无抖动时端点应严格匹配 / strict match without jitter
+        seed=42,
+    )
+    assert np.allclose(xy[0], start, atol=1e-3)
+    assert np.allclose(xy[-1], end, atol=1e-3)
+
+
+def test_trajectory_reproducible(model_path: str) -> None:
+    """同 seed 应生成相同轨迹 / Same seed must yield identical trajectories."""
+    kwargs = dict(
+        model_path=model_path,
+        start_point=(100, 100),
+        end_point=(800, 600),
+        num_points=80,
+        jitter_amplitude=0.5,
+        seed=12345,
+    )
+    xy1, dt1 = generate_mouse_trajectory(**kwargs)
+    xy2, dt2 = generate_mouse_trajectory(**kwargs)
+    np.testing.assert_array_equal(xy1, xy2)
+    np.testing.assert_array_equal(dt1, dt2)

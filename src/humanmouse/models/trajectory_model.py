@@ -1,22 +1,32 @@
-#!/usr//env python3
-# human_mouse_stat_mj.py
-# 统计‑混合模型 ＋ Minimum‑Jerk 噪声（修正版 2025‑07‑15）
-# Statistical Mixture Model + Minimum-Jerk Noise (Revised 2025-07-15)
-# ----------------------------------------------------
-# 依赖：numpy pandas scipy scikit-learn
-# Dependencies: numpy pandas scipy scikit-learn
+#!/usr/bin/env python3
+"""
+统计‑混合模型 ＋ Minimum‑Jerk 噪声
+Statistical Mixture Model + Minimum-Jerk Noise.
 
+依赖：numpy pandas scipy scikit-learn
+Dependencies: numpy pandas scipy scikit-learn
+"""
 import argparse
-import pickle
-from pathlib import Path
-from typing import Tuple, Optional
 import inspect
+import pickle
+import warnings
+from pathlib import Path
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 from scipy import interpolate
 from sklearn.decomposition import PCA
+from sklearn.exceptions import InconsistentVersionWarning
 from sklearn.mixture import GaussianMixture
+
+# 抑制 sklearn 跨版本噪声告警 / Silence sklearn cross-version noise
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    message="covariance is not symmetric positive-semidefinite",
+)
 
 # ====================================================
 #                      核心类定义
