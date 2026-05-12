@@ -5,6 +5,7 @@ Smoke tests for trajectory generation - geometry only, no real mouse driving.
 import numpy as np
 import pytest
 
+from humanmouse import HumanMouseController
 from humanmouse.models import generate_mouse_trajectory, get_default_model_path
 
 
@@ -71,3 +72,27 @@ def test_trajectory_reproducible(model_path: str) -> None:
     xy2, dt2 = generate_mouse_trajectory(**kwargs)
     np.testing.assert_array_equal(xy1, xy2)
     np.testing.assert_array_equal(dt1, dt2)
+
+
+def test_straight_mode_exact_endpoints() -> None:
+    """直线模式端点必须严格命中 / Straight mode must hit endpoints exactly."""
+    controller = HumanMouseController(straight=True, num_points=60)
+    xy, dt = controller._generate_trajectory((100.0, 100.0), (800.0, 600.0))
+    assert xy.shape == (60, 2)
+    np.testing.assert_array_equal(xy[0], np.float32((100.0, 100.0)))
+    np.testing.assert_array_equal(xy[-1], np.float32((800.0, 600.0)))
+    assert dt[0] == 0.0
+
+
+def test_straight_mode_zero_perpendicular_offset() -> None:
+    """直线模式所有点应位于起终连线上 / All points must lie on the start-end line."""
+    start = np.array([100.0, 100.0], dtype=np.float32)
+    end = np.array([800.0, 600.0], dtype=np.float32)
+    controller = HumanMouseController(straight=True, num_points=80)
+    xy, _ = controller._generate_trajectory(tuple(start), tuple(end))
+
+    direction = end - start
+    direction /= np.linalg.norm(direction)
+    perp = np.array([-direction[1], direction[0]], dtype=np.float32)
+    offsets = (xy - start) @ perp
+    assert np.max(np.abs(offsets)) < 1e-3

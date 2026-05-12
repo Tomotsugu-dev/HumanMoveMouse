@@ -3,62 +3,60 @@
 ![PyPI](https://img.shields.io/pypi/v/humanmovemouse)[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-🎯 **Human-like mouse automation using statistical models and minimum-jerk interpolation.**
+🎯 **Python 鼠标自动化工具:仿人类轨迹移动、像素精确直线移动、跨应用录制与精确回放。**
+🎯 **Python mouse automation: human-like trajectories, pixel-exact straight moves, and global record / precise replay.**
 
 ---
 
 ## 📑 Table of Contents
 
-- [🎯 Overview](#-overview)
 - [✨ Features](#-features)
 - [📦 Installation](#-installation)
 - [🚀 Quick Start](#-quick-start)
-  - [Basic Usage](#basic-usage)
-  - [Using Current Mouse Position](#using-current-mouse-position)
-  - [Customizing Movement Parameters](#customizing-movement-parameters)
+  - [Basic Mouse Actions](#basic-mouse-actions)
+  - [From Current Position](#from-current-position)
+  - [Customizing Movement](#customizing-movement)
+  - [Straight-Line Mode](#straight-line-mode)
+  - [Recording](#recording)
+  - [Playback](#playback)
+- [🖥️ Command Line](#%EF%B8%8F-command-line)
 - [📖 API Reference](#-api-reference)
   - [HumanMouseController](#humanmousecontroller)
   - [Methods Starting from Current Position](#methods-starting-from-current-position)
-- [🔧 Advanced Usage](#-advanced-usage)
-  - [Using Custom Models](#using-custom-models)
+  - [Recorder](#recorder)
+  - [Playback Functions](#playback-functions)
+  - [Utilities](#utilities)
+- [🔧 Advanced](#-advanced)
+  - [Custom Models](#custom-models)
   - [Training Your Own Model](#training-your-own-model)
+  - [Project Layout](#project-layout)
+- [⚠️ Platform Notes](#%EF%B8%8F-platform-notes)
 - [📄 License](#-license)
-- [⚠️ Disclaimer](#️-disclaimer)
+- [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
 - [🤝 Contributing](#-contributing)
-
----
-
-## 🎯 Overview
-
-**HumanMoveMouse** is a human-like mouse automation tool built on over **300 real human mouse movement samples**.
-
-By extracting key statistical features from these trajectories and combining them with minimum-jerk interpolation, the tool enables the generation of natural, smooth, and realistic cursor paths.
-
-These paths closely mimic real human behavior and are ideal for automation tasks requiring authenticity, such as UI testing, game botting, or user behavior simulation.
 
 ---
 
 ## ✨ Features
 
-- **Human-like Trajectory Generation**: Generates mouse paths that follow human-like patterns based on a real-data model.
-
-- **Multiple Mouse Actions**: Supports various common operations, including moving, clicking, double-clicking, right-clicking, and dragging.
-
-- **Highly Customizable**:
-  
-  - **Speed Control**: Adjust movement speed via the `speed_factor` parameter.
-  
-  - **Trajectory Smoothness**: Control the number of points in the trajectory with the `num_points` parameter.
-  
-  - **Jitter Effect**: Add random jitter to make movements more realistic with the `jitter_amplitude` parameter.
-
-- **Reproducibility**: By setting a random seed (`seed`), you can generate the exact same mouse trajectory, which is useful for debugging and testing.
-
-- **Pre-trained Model**: Includes a model trained on real human mouse movements for immediate use.
+- **Human-like trajectories** — smooth, naturalistic mouse paths suitable for UI testing, demos, or behavior simulation.
+- **Pixel-exact straight-line mode** — bypass the human model when you need precise endpoints (e.g. clicking small UI targets).
+- **All common mouse actions** — move, click, double-click, right-click, drag.
+- **Move from current cursor position** — `move_to`, `click_at`, `double_click_at`, `right_click_at`, `drag_to`.
+- **Adjustable speed / smoothness / jitter** — `speed_factor`, `num_points`, `jitter_amplitude`.
+- **Reproducible paths** — pass `seed` to regenerate the exact same trajectory.
+- **Cross-application recording** — capture global mouse + keyboard events to a portable JSONL file.
+- **Precise playback** — replay recordings byte-for-byte with the original timing; supports speed scaling, looping, and abort hotkey.
+- **CLI included** — `humanmouse move / click / drag / record / play`.
+- **Pre-trained model bundled** — works out of the box, no setup required.
 
 ### 🎬 Demo
 
+<div align="center">
+
 https://github.com/user-attachments/assets/55e5e295-bb93-4122-b4de-63380c4d1b13
+
+</div>
 
 ---
 
@@ -79,9 +77,10 @@ uv add HumanMoveMouse
 ### From source (development)
 
 ```bash
-# clone the repo, then:
-uv sync                         # creates .venv and installs deps + the package in editable mode
-# or with plain pip:
+git clone https://github.com/Tomotsugu-dev/HumanMoveMouse
+cd HumanMoveMouse
+uv sync                 # creates .venv + installs deps + the package in editable mode
+# or:
 pip install -e ".[dev]"
 ```
 
@@ -94,51 +93,128 @@ Optional extras:
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### Basic Mouse Actions
 
 ```python
 from humanmouse import HumanMouseController
 
-# Create a controller instance
 controller = HumanMouseController()
 
-# Move the mouse
-controller.move((100, 100), (800, 600))
-
-# Move and click
-controller.move_and_click((100, 100), (400, 400))
-
-# Move and double-click
-controller.move_and_double_click((400, 400), (600, 300))
-
-# Drag and drop
-controller.drag((300, 300), (500, 500))
+controller.move((100, 100), (800, 600))                       # Move
+controller.move_and_click((100, 100), (400, 400))             # Move + left click
+controller.move_and_double_click((400, 400), (600, 300))      # Move + double click
+controller.move_and_right_click((600, 300), (800, 500))       # Move + right click
+controller.drag((300, 300), (500, 500))                       # Drag
 ```
 
-### Using Current Mouse Position
+### From Current Position
+
+These shortcuts read the live cursor location and use it as the start point:
 
 ```python
-# New methods that start from current mouse position
-controller.move_to((800, 600))              # Move from current position
-controller.click_at((400, 400))             # Move and click
-controller.double_click_at((600, 300))      # Move and double-click
-controller.right_click_at((500, 500))       # Move and right-click
-controller.drag_to((300, 300))              # Drag from current position
+controller.move_to((800, 600))
+controller.click_at((400, 400))
+controller.double_click_at((600, 300))
+controller.right_click_at((500, 500))
+controller.drag_to((300, 300))
 ```
 
-### Customizing Movement Parameters
+### Customizing Movement
 
 ```python
-# Create controller with custom parameters
 controller = HumanMouseController(
-    num_points=200,           # More points = smoother movement
-    jitter_amplitude=0.2,     # Less jitter = straighter path
-    speed_factor=0.5          # Slower movement
+    num_points=200,           # More points = smoother
+    jitter_amplitude=0.2,     # Less jitter = straighter, calmer path
+    speed_factor=0.5,         # <1 slower, >1 faster
 )
 
-# Set speed dynamically
-controller.set_speed(2.0)  # Double speed
-controller.move((100, 100), (800, 600))
+# Adjust speed dynamically:
+controller.set_speed(2.0)     # 2x speed
+controller.set_speed(0.5)     # half speed
+```
+
+### Straight-Line Mode
+
+Need pixel-exact endpoints with no curvature and no jitter — useful for clicking
+small UI targets:
+
+```python
+# Enable at construction
+controller = HumanMouseController(straight=True, speed_factor=2.0)
+controller.move_to((250, 425))   # Pixel-exact endpoint
+
+# Or flip on an existing controller
+controller.straight = True
+controller.click_at((1024, 768))
+```
+
+Straight mode ignores `jitter_amplitude` and `seed`. Baseline speed is
+`HumanMouseController.STRAIGHT_PX_PER_SEC` (default 1500 px/s), further scaled
+by `speed_factor`.
+
+### Recording
+
+Capture global mouse + keyboard events across any application to a JSONL file:
+
+```python
+from humanmouse import Recorder
+
+# Programmatic
+rec = Recorder()
+rec.start()
+rec.wait(timeout=10)         # block 10s, or rec.stop() from another thread
+rec.save("session.jsonl")
+
+# Context manager
+with Recorder() as rec:
+    rec.wait(timeout=10)
+rec.save("session.jsonl")
+
+# Mouse only, custom stop hotkey
+rec = Recorder(capture_keyboard=False, stop_hotkey="esc")
+rec.start()
+rec.wait()                   # waits until Esc is pressed
+rec.save("mouse_only.jsonl")
+```
+
+### Playback
+
+Replay a recording with original timing (or scaled). Press **Esc** during
+playback to abort.
+
+```python
+from humanmouse import play_file
+
+play_file("session.jsonl")                        # 1x speed, once
+play_file("session.jsonl", speed=3.0)             # 3x faster
+play_file("session.jsonl", loop=5)                # repeat 5 times
+play_file("session.jsonl", abort_key=None)        # disable abort hotkey
+```
+
+---
+
+## 🖥️ Command Line
+
+The `humanmouse` console script is installed automatically.
+
+```bash
+# Move / click / drag (uses live cursor as start point)
+humanmouse move  --to 800 600 --speed 2.0
+humanmouse click --at 500 400
+humanmouse click --at 500 400 --button right
+humanmouse click --at 500 400 --double
+humanmouse drag  --from 100 100 --to 800 600
+
+# Record (press F10 to stop; or set --duration)
+humanmouse record session.jsonl
+humanmouse record session.jsonl --no-keyboard
+humanmouse record session.jsonl --duration 30
+humanmouse record session.jsonl --stop-key esc
+
+# Replay (press Esc to abort)
+humanmouse play  session.jsonl
+humanmouse play  session.jsonl --speed 2.0 --loop 3
+humanmouse play  session.jsonl --abort-key ''      # disable abort key
 ```
 
 ---
@@ -147,132 +223,152 @@ controller.move((100, 100), (800, 600))
 
 ### HumanMouseController
 
-#### `__init__(self, model_pkl=None, num_points=100, jitter_amplitude=0.3, speed_factor=1.0)`
+#### `__init__(model_pkl=None, num_points=100, jitter_amplitude=0.3, speed_factor=1.0, straight=False)`
 
-Initialize the controller.
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `model_pkl` | `str \| None` | `None` | Path to a custom model file. `None` uses the bundled model. |
+| `num_points` | `int` | `100` | Number of trajectory points. Higher = smoother. |
+| `jitter_amplitude` | `float` | `0.3` | Random jitter magnitude in pixels. `0` disables. Ignored when `straight=True`. |
+| `speed_factor` | `float` | `1.0` | Speed multiplier. `>1` faster, `<1` slower. |
+| `straight` | `bool` | `False` | If `True`, move in a strict straight line with exact endpoints. |
 
-**Parameters:**
+#### Movement methods (explicit start point)
 
-- `model_pkl` (str, optional): Path to a custom model file. If None, uses the built-in model.
-- `num_points` (int): Number of trajectory points. Higher = smoother. Default: 100.
-- `jitter_amplitude` (float): Random jitter magnitude. 0 = no jitter. Default: 0.3.
-- `speed_factor` (float): Movement speed multiplier. >1 = faster, <1 = slower. Default: 1.0.
+| Method | Effect |
+|---|---|
+| `move(start, end, seed=None)` | Move from `start` to `end`. |
+| `move_and_click(start, end, seed=None)` | Move then left-click. |
+| `move_and_double_click(start, end, seed=None)` | Move then double-click. |
+| `move_and_right_click(start, end, seed=None)` | Move then right-click. |
+| `drag(start, end, seed=None)` | Press left button, drag from `start` to `end`, release. |
 
-#### `controller.move(start_point, end_point, seed=None)`
+`start` and `end` are `(x, y)` tuples. Pass `seed` (int) for a reproducible trajectory.
 
-Move the mouse from start to end point.
+#### `set_speed(speed_factor)`
 
-```python
-controller.move((100, 100), (800, 600))
-controller.move((100, 100), (800, 600), seed=42)  # Reproducible trajectory
-```
-
-**Parameters:**
-
-- `start_point` (tuple): Starting coordinates (x, y).
-- `end_point` (tuple): Target coordinates (x, y).
-- `seed` (int, optional): Random seed for reproducible trajectories.
-
-#### `controller.move_and_click(start_point, end_point, seed=None)`
-
-Move to a location and perform a single click.
+Change speed at runtime. Must be `> 0`.
 
 ```python
-controller.move_and_click((100, 100), (400, 400))
+controller.set_speed(2.0)
 ```
-
-#### `controller.move_and_double_click(start_point, end_point, seed=None)`
-
-Move to a location and perform a double click.
-
-```python
-controller.move_and_double_click((400, 400), (600, 300))
-```
-
-#### `controller.move_and_right_click(start_point, end_point, seed=None)`
-
-Move to a location and perform a right click.
-
-```python
-controller.move_and_right_click((600, 300), (800, 500))
-```
-
-#### `controller.drag(start_point, end_point, seed=None)`
-
-Drag from start to end point (press and hold left button).
-
-```python
-controller.drag((300, 300), (500, 500))
-```
-
-#### `controller.set_speed(speed_factor)`
-
-Dynamically adjust movement speed.
-
-```python
-controller.set_speed(2.0)  # Double speed
-controller.set_speed(0.5)  # Half speed
-```
-
-**Parameters:**
-
-- `speed_factor` (float): New speed multiplier (must be > 0).
 
 ### Methods Starting from Current Position
 
-#### `controller.move_to(end_point, seed=None)`
+These read the live cursor position and use it as `start`:
 
-Move from current mouse position to target position.
+| Method | Effect |
+|---|---|
+| `move_to(end, seed=None)` | Move to `end`. |
+| `click_at(end, seed=None)` | Move to `end` and left-click. |
+| `double_click_at(end, seed=None)` | Move to `end` and double-click. |
+| `right_click_at(end, seed=None)` | Move to `end` and right-click. |
+| `drag_to(end, seed=None)` | Drag from current position to `end`. |
+
+#### `create_controller(**kwargs)` (factory)
 
 ```python
-controller.move_to((800, 600))
-controller.move_to((800, 600), seed=42)  # Reproducible trajectory
+from humanmouse import create_controller
+controller = create_controller(straight=True, speed_factor=2.0)
 ```
 
-**Parameters:**
+Equivalent to `HumanMouseController(**kwargs)`.
 
-- `end_point` (tuple): Target coordinates (x, y).
-- `seed` (int, optional): Random seed for reproducible trajectories.
-
-#### `controller.click_at(end_point, seed=None)`
-
-Move from current position to target and perform a single click.
+### Recorder
 
 ```python
-controller.click_at((400, 400))
+from humanmouse import Recorder
 ```
 
-#### `controller.double_click_at(end_point, seed=None)`
+#### `Recorder(capture_mouse=True, capture_keyboard=True, stop_hotkey="f10")`
 
-Move from current position to target and perform a double click.
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `capture_mouse` | `bool` | `True` | Capture move / click / scroll events. |
+| `capture_keyboard` | `bool` | `True` | Capture key press / release events. |
+| `stop_hotkey` | `str \| None` | `"f10"` | Single-key name that stops recording. Pass `None` to disable. |
+
+#### Methods
+
+| Method | Description |
+|---|---|
+| `start()` | Begin listening. Non-blocking. Raises `RuntimeError` if already running. |
+| `stop()` | Stop listening. Idempotent. |
+| `wait(timeout=None)` | Block until `stop()` is called or `timeout` seconds elapse. |
+| `events()` | Return a shallow copy of the captured event list. |
+| `save(path)` | Write captured events to a JSONL file. |
+
+`Recorder` is also a context manager:
 
 ```python
-controller.double_click_at((600, 300))
+with Recorder() as rec:
+    rec.wait(timeout=10)
+rec.save("session.jsonl")
 ```
 
-#### `controller.right_click_at(end_point, seed=None)`
-
-Move from current position to target and perform a right click.
+### Playback Functions
 
 ```python
-controller.right_click_at((500, 500))
+from humanmouse import play_file, play_events
 ```
 
-#### `controller.drag_to(end_point, seed=None)`
+#### `play_file(path, speed=1.0, loop=1, abort_key="esc")`
 
-Drag from current position to target (press and hold left button).
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `path` | `str` | — | JSONL recording path. |
+| `speed` | `float` | `1.0` | Playback speed multiplier. |
+| `loop` | `int` | `1` | Number of times to play. |
+| `abort_key` | `str \| None` | `"esc"` | Single-key name to abort. Pass `None` to disable. |
+
+#### `play_events(events, speed=1.0, abort_key="esc")`
+
+Same as `play_file` but takes a list of event dicts (already deserialized).
+
+### Utilities
 
 ```python
-controller.drag_to((300, 300))
+from humanmouse.utils import track_mouse_position
+track_mouse_position(duration=30)   # live-print cursor position for 30s
+```
+
+#### File format (JSONL)
+
+One JSON event per line. `t` is seconds from session start.
+
+```jsonc
+{"t":0.000,"type":"meta","version":1,"started_at":"2026-05-12T12:00:00+00:00"}
+{"t":0.016,"type":"move",  "x":100,"y":200}
+{"t":0.123,"type":"click", "x":250,"y":425,"button":"left","pressed":true}
+{"t":0.124,"type":"click", "x":250,"y":425,"button":"left","pressed":false}
+{"t":0.500,"type":"scroll","x":250,"y":425,"dx":0,"dy":-1}
+{"t":1.200,"type":"key",   "key":"a","pressed":true}
+{"t":1.230,"type":"key",   "key":"a","pressed":false}
+```
+
+| Type | Fields |
+|---|---|
+| `meta` | `version` (int), `started_at` (ISO-8601) |
+| `move` | `x`, `y` |
+| `click` | `x`, `y`, `button` (`"left"`/`"right"`/`"middle"`), `pressed` (bool) |
+| `scroll` | `x`, `y`, `dx`, `dy` (only `dy` is replayed) |
+| `key` | `key` (str), `pressed` (bool) |
+
+You can also read/write JSONL recordings directly:
+
+```python
+from humanmouse.recording import read_jsonl, write_jsonl
+events = read_jsonl("session.jsonl")
+write_jsonl("session.jsonl", events)
 ```
 
 ---
 
-## 🔧 Advanced Usage
+## 🔧 Advanced
 
-### Using Custom Models
+### Custom Models
 
-If you have a custom-trained model file, you can load it:
+Load your own trained model file:
 
 ```python
 controller = HumanMouseController(model_pkl="path/to/your/model.pkl")
@@ -280,10 +376,8 @@ controller = HumanMouseController(model_pkl="path/to/your/model.pkl")
 
 ### Training Your Own Model
 
-Collect raw trajectories with the Pygame collector, then re-train the bundled model:
-
 ```bash
-# 1. Collect samples (saves CSVs into csv_data/)
+# 1. Collect samples (saves CSVs into csv_data/). Needs the [collector] extra.
 uv run python csv_data_collector/mouse_trajectory_collector.py
 
 # 2. Re-train the bundled model from csv_data/
@@ -293,19 +387,19 @@ uv run python scripts/train_model.py
 ### Project Layout
 
 ```text
-src/humanmouse/          # Library code (PEP 420 src layout)
-  __init__.py            # Public API: HumanMouseController, create_controller
-  __version__.py
-  cli.py                 # `humanmouse` console script
+src/humanmouse/
+  __init__.py            # Public API: HumanMouseController, Recorder, play_file, ...
+  cli.py                 # humanmouse console script
   controllers/           # HumanMouseController
-  models/                # PCA + GMM + Minimum-Jerk trajectory model
+  models/
     data/mouse_model.pkl # Bundled, pre-trained model
-  utils/                 # track_mouse_position helper
-csv_data/                # 330+ recorded human trajectories (training corpus)
+  recording/             # Recorder + player + JSONL schema
+  utils/                 # track_mouse_position
+csv_data/                # Recorded training trajectories
 csv_data_collector/      # Pygame app to record more trajectories
 demos/                   # Runnable demo scripts
 scripts/train_model.py   # Re-train the bundled model from csv_data/
-tests/                   # pytest smoke tests
+tests/                   # pytest test suite
 ```
 
 ### Running tests
@@ -316,9 +410,24 @@ uv run pytest
 
 ---
 
+## ⚠️ Platform Notes
+
+- **macOS**: The first run will receive zero events until you grant Accessibility
+  permission to your terminal / Python interpreter at
+  *System Settings → Privacy & Security → Accessibility*. Restart the terminal
+  after granting.
+- **Linux**: Works on X11. Wayland support in the underlying input library is limited.
+- **Replay coordinate caveat**: Coordinates are absolute pixels. If screen
+  resolution, DPI, or target window positions differ between recording and
+  replay, the playback will hit the wrong locations even though timing is exact.
+- **Horizontal scroll** (`dx`): captured but ignored on playback (the playback
+  backend only supports vertical scrolling).
+
+---
+
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Licensed under the MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
@@ -331,7 +440,6 @@ This project is provided for **educational and research purposes only**. By usin
 1. **Legal Use Only**: This tool must only be used in compliance with all applicable laws and regulations. Users are solely responsible for ensuring their use complies with local, state, federal, and international laws.
 
 2. **No Malicious Use**: This software must NOT be used for any malicious, harmful, or illegal activities, including but not limited to:
-   
    - Unauthorized access to computer systems
    - Circumventing security measures or access controls
    - Creating or distributing malware
@@ -340,13 +448,11 @@ This project is provided for **educational and research purposes only**. By usin
    - Any form of fraud, deception, or harassment
 
 3. **User Responsibility**: Users assume full responsibility and liability for their use of this software. The developers and contributors:
-   
    - Are NOT responsible for any misuse or damage caused by this tool
    - Do NOT endorse or encourage any illegal or unethical use
    - Cannot be held liable for any consequences resulting from the use of this software
 
 4. **No Warranty**: This software is provided "AS IS" without warranty of any kind, express or implied. The developers make no guarantees about its:
-   
    - Suitability for any particular purpose
    - Reliability, accuracy, or performance
    - Compatibility with any specific system or application
@@ -359,4 +465,4 @@ This project is provided for **educational and research purposes only**. By usin
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please check out the [GitHub repository](https://github.com/Tomotsugu-dev/HumanMoveMouse) for development setup and guidelines.
+Contributions are welcome! Please open an issue or PR on the [GitHub repository](https://github.com/Tomotsugu-dev/HumanMoveMouse).

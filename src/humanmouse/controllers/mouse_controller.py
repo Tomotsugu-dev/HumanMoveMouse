@@ -37,11 +37,16 @@ class HumanMouseController:
     - 按住左键拖拽 / Drag and drop (press and hold left button)
     """
 
+    # 直线模式下的基准速度(像素/秒);最终耗时还会被 speed_factor 进一步缩放
+    # Baseline pixel/second for straight mode; further scaled by speed_factor at execution time.
+    STRAIGHT_PX_PER_SEC: float = 1500.0
+
     def __init__(self,
                  model_pkl: Optional[str] = None,
                  num_points: int = 100,
                  jitter_amplitude: float = 0.3,
-                 speed_factor: float = 1.0):
+                 speed_factor: float = 1.0,
+                 straight: bool = False):
         """
         初始化鼠标控制器
         Initializes the mouse controller.
@@ -51,12 +56,14 @@ class HumanMouseController:
             num_points: 轨迹采样点数，默认100 / Number of points for trajectory sampling, default is 100.
             jitter_amplitude: 抖动幅度，默认0.3 / Amplitude of the jitter, default is 0.3.
             speed_factor: 速度因子，默认1.0，值越大移动越快 / Speed factor, default is 1.0, higher values mean faster movement.
+            straight: 直线旁路模式，跳过 PCA/GMM 模型直接走直线 / Straight-line bypass; skips the PCA/GMM model.
         """
         # 默认走包内随包分发的模型 / Default to the model bundled with the package
         self.model_pkl: str = model_pkl if model_pkl is not None else get_default_model_path()
         self.num_points = num_points
         self.jitter_amplitude = jitter_amplitude
         self.speed_factor = speed_factor
+        self.straight = straight
 
         _configure_pyautogui()
 
@@ -71,12 +78,15 @@ class HumanMouseController:
         Args:
             start_point: 起始坐标 (x, y) / Starting coordinates (x, y).
             end_point: 结束坐标 (x, y) / Ending coordinates (x, y).
-            seed: 随机种子，默认None表示随机 / Random seed, None means random.
+            seed: 随机种子，默认None表示随机(直线模式忽略) / Random seed (ignored in straight mode).
 
         Returns:
             xy: 轨迹坐标数组 (N, 2) / Trajectory coordinate array (N, 2).
             dt: 时间间隔数组 (N,) / Time interval array (N,).
         """
+        if self.straight:
+            return self._straight_trajectory(start_point, end_point)
+
         # 如果没有指定seed，生成随机seed / If no seed is specified, generate a random one.
         if seed is None:
             seed = random.randint(0, 1000000)
@@ -89,6 +99,30 @@ class HumanMouseController:
             jitter_amplitude=self.jitter_amplitude,
             seed=seed
         )
+
+    def _straight_trajectory(self,
+                             start_point: Tuple[float, float],
+                             end_point: Tuple[float, float]
+                             ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        生成严格直线轨迹 + Minimum-Jerk 速度剖面(平滑加减速)。
+        Generate a strict straight-line trajectory with a Minimum-Jerk velocity profile.
+
+        端点严格命中 / Endpoints are exact.
+        """
+        start_arr = np.asarray(start_point, dtype=np.float32)
+        end_arr = np.asarray(end_point, dtype=np.float32)
+        xy = np.linspace(start_arr, end_arr, self.num_points, dtype=np.float32)
+
+        dist = float(np.linalg.norm(end_arr - start_arr))
+        total_t = dist / self.STRAIGHT_PX_PER_SEC
+
+        # MJ 速度剖面:两端慢中段快,长度 N-1,总和归一 / MJ velocity profile, sums to 1
+        t_mid = (np.arange(self.num_points - 1) + 0.5) / max(self.num_points - 1, 1)
+        v = 30 * t_mid ** 2 - 60 * t_mid ** 3 + 30 * t_mid ** 4
+        v = v / v.sum() if v.sum() > 0 else np.full_like(v, 1.0 / len(v))
+        dt = np.concatenate(([0.0], v * total_t)).astype(np.float32)
+        return xy, dt
 
     def _execute_trajectory(self, xy: np.ndarray, dt: np.ndarray):
         """
@@ -107,8 +141,10 @@ class HumanMouseController:
             # 移动到下一个点 / Move to the next point.
             pyautogui.moveTo(xy[i, 0], xy[i, 1], duration=0)
             # 等待对应的时间间隔，根据速度因子调整 / Wait for the time interval, adjusted by speed factor.
+            # 注意 dt 是 numpy.float32, Python 3.13 的 time.sleep 不接受, 必须转 float.
+            # Note: dt is numpy.float32; Python 3.13's time.sleep rejects it, so cast to float.
             if dt[i] > 0:
-                adjusted_delay = dt[i] / self.speed_factor
+                adjusted_delay = float(dt[i]) / self.speed_factor
                 if adjusted_delay > 0:
                     time.sleep(adjusted_delay)
 
@@ -211,7 +247,7 @@ class HumanMouseController:
         for i in range(1, len(xy)):
             pyautogui.moveTo(xy[i, 0], xy[i, 1], duration=0)
             if dt[i] > 0:
-                adjusted_delay = dt[i] / self.speed_factor
+                adjusted_delay = float(dt[i]) / self.speed_factor
                 if adjusted_delay > 0:
                     time.sleep(adjusted_delay)
 

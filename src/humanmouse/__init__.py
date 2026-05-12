@@ -4,10 +4,14 @@ A human-like mouse movement automation tool based on real trajectory data
 """
 from .__version__ import __version__
 from .controllers.mouse_controller import HumanMouseController
+from .recording import Recorder, play_events, play_file
 
 __all__ = [
     "HumanMouseController",
+    "Recorder",
     "create_controller",
+    "play_events",
+    "play_file",
     "__version__",
 ]
 

@@ -10,6 +10,7 @@ import pyautogui
 
 from .__version__ import __version__
 from .controllers.mouse_controller import HumanMouseController
+from .recording import Recorder, play_file
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -23,6 +24,8 @@ def _build_parser() -> argparse.ArgumentParser:
             "  humanmouse click --at 500 400\n"
             "  humanmouse drag --from 100 100 --to 800 600\n"
             "  humanmouse move --to 800 600 --speed 2.0\n"
+            "  humanmouse record session.jsonl                 # F10 to stop\n"
+            "  humanmouse play   session.jsonl --speed 2.0\n"
         ),
     )
     parser.add_argument(
@@ -53,6 +56,38 @@ def _build_parser() -> argparse.ArgumentParser:
     drag_p.add_argument("--to", nargs=2, type=int, required=True, metavar=("X", "Y"))
     drag_p.add_argument("--speed", type=float, default=1.0)
 
+    # --- record ---
+    rec_p = sub.add_parser("record", help="Record mouse + keyboard events to JSONL")
+    rec_p.add_argument("output", help="Output JSONL path")
+    rec_p.add_argument(
+        "--no-mouse", action="store_true", help="Skip mouse events"
+    )
+    rec_p.add_argument(
+        "--no-keyboard", action="store_true", help="Skip keyboard events"
+    )
+    rec_p.add_argument(
+        "--duration", type=float, default=None,
+        help="Auto-stop after N seconds (default: wait for F10)",
+    )
+    rec_p.add_argument(
+        "--stop-key", default="f10",
+        help="Single-key stop hotkey name (default: f10). Examples: f10, esc",
+    )
+
+    # --- play ---
+    play_p = sub.add_parser("play", help="Replay a JSONL recording")
+    play_p.add_argument("input", help="Recording JSONL path")
+    play_p.add_argument(
+        "--speed", type=float, default=1.0, help="Playback speed multiplier"
+    )
+    play_p.add_argument(
+        "--loop", type=int, default=1, help="Number of times to loop"
+    )
+    play_p.add_argument(
+        "--abort-key", default="esc",
+        help="Abort hotkey name (default: esc); pass '' to disable",
+    )
+
     return parser
 
 
@@ -69,6 +104,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     try:
+        if args.command == "record":
+            return _cmd_record(args)
+        if args.command == "play":
+            return _cmd_play(args)
+
         controller = HumanMouseController()
         controller.set_speed(args.speed)
         current = pyautogui.position()
@@ -93,6 +133,38 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except Exception as exc:  # noqa: BLE001
         print(f"Error: {exc}", file=sys.stderr)
         return 1
+
+
+def _cmd_record(args: argparse.Namespace) -> int:
+    rec = Recorder(
+        capture_mouse=not args.no_mouse,
+        capture_keyboard=not args.no_keyboard,
+        stop_hotkey=args.stop_key or None,
+    )
+    print(f"Recording to {args.output} ...")
+    if args.duration:
+        print(f"  Auto-stop after {args.duration:.1f}s.")
+    else:
+        print(f"  Press {args.stop_key} to stop.")
+    rec.start()
+    try:
+        rec.wait(timeout=args.duration)
+    except KeyboardInterrupt:
+        rec.stop()
+    rec.save(args.output)
+    n = sum(1 for _ in rec.events()) - 1  # 减去 meta 头 / minus meta header
+    print(f"Saved {n} events to {args.output}")
+    return 0
+
+
+def _cmd_play(args: argparse.Namespace) -> int:
+    abort = args.abort_key or None
+    print(f"Playing {args.input} at speed={args.speed}x, loop={args.loop} ...")
+    if abort:
+        print(f"  Press {abort} to abort.")
+    play_file(args.input, speed=args.speed, loop=args.loop, abort_key=abort)
+    print("Playback finished.")
+    return 0
 
 
 if __name__ == "__main__":
