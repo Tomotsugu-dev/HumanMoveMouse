@@ -1,7 +1,17 @@
+<!-- markdownlint-disable MD033 -->
+<!-- markdownlint-disable MD034 -->
+
 # HumanMoveMouse 🖱️
 
-![PyPI](https://img.shields.io/pypi/v/humanmovemouse)[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
+<div align="center">
+
+[![PyPI version](https://img.shields.io/pypi/v/humanmovemouse.svg)](https://pypi.org/project/HumanMoveMouse/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
+[![Downloads](https://static.pepy.tech/badge/humanmovemouse)](https://pepy.tech/projects/humanmovemouse)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](https://github.com/Tomotsugu-dev/HumanMoveMouse)
+
+</div>
 
 🎯 **Python 鼠标自动化工具:仿人类轨迹移动、像素精确直线移动、跨应用录制与精确回放。**
 🎯 **Python mouse automation: human-like trajectories, pixel-exact straight moves, and global record / precise replay.**
@@ -10,30 +20,44 @@
 
 ## 📑 Table of Contents
 
-- [✨ Features](#-features)
-- [📦 Installation](#-installation)
-- [🚀 Quick Start](#-quick-start)
-  - [Basic Mouse Actions](#basic-mouse-actions)
-  - [From Current Position](#from-current-position)
-  - [Customizing Movement](#customizing-movement)
-  - [Straight-Line Mode](#straight-line-mode)
-  - [Recording](#recording)
-  - [Playback](#playback)
-- [🖥️ Command Line](#%EF%B8%8F-command-line)
-- [📖 API Reference](#-api-reference)
-  - [HumanMouseController](#humanmousecontroller)
-  - [Methods Starting from Current Position](#methods-starting-from-current-position)
-  - [Recorder](#recorder)
-  - [Playback Functions](#playback-functions)
-  - [Utilities](#utilities)
-- [🔧 Advanced](#-advanced)
-  - [Custom Models](#custom-models)
-  - [Training Your Own Model](#training-your-own-model)
-  - [Project Layout](#project-layout)
-- [⚠️ Platform Notes](#%EF%B8%8F-platform-notes)
-- [📄 License](#-license)
-- [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
-- [🤝 Contributing](#-contributing)
+- [HumanMoveMouse 🖱️](#humanmovemouse-️)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [✨ Features](#-features)
+    - [🎬 Demo](#-demo)
+  - [📦 Installation](#-installation)
+    - [From source (development)](#from-source-development)
+  - [🚀 Quick Start](#-quick-start)
+    - [Basic Mouse Actions](#basic-mouse-actions)
+    - [From Current Position](#from-current-position)
+    - [Customizing Movement](#customizing-movement)
+    - [Straight-Line Mode](#straight-line-mode)
+    - [Recording](#recording)
+    - [Playback](#playback)
+  - [🖥️ Command Line](#️-command-line)
+  - [📖 API Reference](#-api-reference)
+    - [HumanMouseController](#humanmousecontroller)
+      - [`__init__(model_pkl=None, num_points=100, jitter_amplitude=0.3, speed_factor=1.0, straight=False)`](#__init__model_pklnone-num_points100-jitter_amplitude03-speed_factor10-straightfalse)
+      - [Movement methods (explicit start point)](#movement-methods-explicit-start-point)
+      - [`set_speed(speed_factor)`](#set_speedspeed_factor)
+    - [Methods Starting from Current Position](#methods-starting-from-current-position)
+      - [`create_controller(**kwargs)` (factory)](#create_controllerkwargs-factory)
+    - [Recorder](#recorder)
+      - [`Recorder(capture_mouse=True, capture_keyboard=True, stop_hotkey="f10")`](#recordercapture_mousetrue-capture_keyboardtrue-stop_hotkeyf10)
+      - [Methods](#methods)
+    - [Playback Functions](#playback-functions)
+      - [`play_file(path, speed=1.0, loop=1, abort_key="esc")`](#play_filepath-speed10-loop1-abort_keyesc)
+      - [`play_events(events, speed=1.0, abort_key="esc")`](#play_eventsevents-speed10-abort_keyesc)
+    - [Utilities](#utilities)
+      - [File format (JSONL)](#file-format-jsonl)
+  - [🔧 Advanced](#-advanced)
+    - [Custom Models](#custom-models)
+    - [Training Your Own Model](#training-your-own-model)
+    - [Project Layout](#project-layout)
+    - [Running tests](#running-tests)
+  - [⚠️ Platform Notes](#️-platform-notes)
+  - [📄 License](#-license)
+  - [⚠️ Disclaimer](#️-disclaimer)
+  - [🤝 Contributing](#-contributing)
 
 ---
 
@@ -226,7 +250,7 @@ humanmouse play  session.jsonl --abort-key ''      # disable abort key
 #### `__init__(model_pkl=None, num_points=100, jitter_amplitude=0.3, speed_factor=1.0, straight=False)`
 
 | Parameter | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `model_pkl` | `str \| None` | `None` | Path to a custom model file. `None` uses the bundled model. |
 | `num_points` | `int` | `100` | Number of trajectory points. Higher = smoother. |
 | `jitter_amplitude` | `float` | `0.3` | Random jitter magnitude in pixels. `0` disables. Ignored when `straight=True`. |
@@ -236,7 +260,7 @@ humanmouse play  session.jsonl --abort-key ''      # disable abort key
 #### Movement methods (explicit start point)
 
 | Method | Effect |
-|---|---|
+| --- | --- |
 | `move(start, end, seed=None)` | Move from `start` to `end`. |
 | `move_and_click(start, end, seed=None)` | Move then left-click. |
 | `move_and_double_click(start, end, seed=None)` | Move then double-click. |
@@ -258,7 +282,7 @@ controller.set_speed(2.0)
 These read the live cursor position and use it as `start`:
 
 | Method | Effect |
-|---|---|
+| --- | --- |
 | `move_to(end, seed=None)` | Move to `end`. |
 | `click_at(end, seed=None)` | Move to `end` and left-click. |
 | `double_click_at(end, seed=None)` | Move to `end` and double-click. |
@@ -283,7 +307,7 @@ from humanmouse import Recorder
 #### `Recorder(capture_mouse=True, capture_keyboard=True, stop_hotkey="f10")`
 
 | Parameter | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `capture_mouse` | `bool` | `True` | Capture move / click / scroll events. |
 | `capture_keyboard` | `bool` | `True` | Capture key press / release events. |
 | `stop_hotkey` | `str \| None` | `"f10"` | Single-key name that stops recording. Pass `None` to disable. |
@@ -291,7 +315,7 @@ from humanmouse import Recorder
 #### Methods
 
 | Method | Description |
-|---|---|
+| --- | --- |
 | `start()` | Begin listening. Non-blocking. Raises `RuntimeError` if already running. |
 | `stop()` | Stop listening. Idempotent. |
 | `wait(timeout=None)` | Block until `stop()` is called or `timeout` seconds elapse. |
@@ -315,7 +339,7 @@ from humanmouse import play_file, play_events
 #### `play_file(path, speed=1.0, loop=1, abort_key="esc")`
 
 | Parameter | Type | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `path` | `str` | — | JSONL recording path. |
 | `speed` | `float` | `1.0` | Playback speed multiplier. |
 | `loop` | `int` | `1` | Number of times to play. |
@@ -347,7 +371,7 @@ One JSON event per line. `t` is seconds from session start.
 ```
 
 | Type | Fields |
-|---|---|
+| --- | --- |
 | `meta` | `version` (int), `started_at` (ISO-8601) |
 | `move` | `x`, `y` |
 | `click` | `x`, `y`, `button` (`"left"`/`"right"`/`"middle"`), `pressed` (bool) |
